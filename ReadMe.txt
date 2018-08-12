@@ -1,0 +1,1 @@
+This is meant to be a set of code to be used in a helper article series to learn Change Tracking and assist a user to implement a proof of concept to use. 
