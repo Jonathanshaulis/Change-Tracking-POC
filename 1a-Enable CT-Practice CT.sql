@@ -1,5 +1,5 @@
 /*
-Beginning to learn Change Tracking
+1a Beginning to learn Change Tracking
 */
 -- Enable CT at Database Level
 ALTER DATABASE AdventureWorks2016CTP3
