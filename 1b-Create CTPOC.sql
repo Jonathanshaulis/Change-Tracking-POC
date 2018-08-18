@@ -18,8 +18,9 @@ LOG ON
         SIZE = 1024KB,
         FILEGROWTH = 10%
     );
+GO
 
-USE [CTPOC]
+USE [CTPOC];
 GO
 CREATE SCHEMA [archive]
 GO

@@ -4,6 +4,8 @@
 CREATE THE VERSION TRACKING TABLE
 */
 
+USE CTPOC;
+
 CREATE TABLE [dbo].[VersionTracking]
 ([ID]                [BIGINT] IDENTITY(1, 1) NOT NULL, 
  [Table_Name]        [VARCHAR](255) NOT NULL, 
