@@ -1,5 +1,3 @@
-
-
 USE CTPOC;
 
 -- Move onto second piece of test. Update one row in three different transactions.
@@ -19,13 +17,15 @@ UPDATE dbo.TestRecords1
       FakeDate = '1900-01-01'
 WHERE id = 3;
 
--- View CT versions from table, system tracking, and then records in the table we updated.
+-- View CT versions from VersionTracking
 
 SELECT *
 FROM dbo.VersionTracking;
 
+-- View CT Current version
 SELECT CHANGE_TRACKING_CURRENT_VERSION() AS 'Tracking Current Version';
 
+-- View records in the table we updated.
 SELECT *
 FROM dbo.TestRecords1;
 
@@ -134,10 +134,9 @@ UPDATE dbo.TestRecords1
 WHERE id = 1;
 
 -- Run CT process, expect one row to migrate over.
-
-DECLARE @bigint BIGINT;
-
-DECLARE @newbigint BIGINT;
+-- Uncomment these declare statements if you are running this in batches
+--DECLARE @bigint BIGINT;
+--DECLARE @newbigint BIGINT;
 
 SET @newbigint =
 (
