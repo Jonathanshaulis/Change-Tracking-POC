@@ -52,9 +52,9 @@ USING
            t.FakeInt, 
            t.FakeDate
     FROM TestRecords1 t
--- Join to system table allows us to filter results
+         -- Join to system table allows us to filter results
          LEFT JOIN CHANGETABLE(CHANGES dbo.TestRecords1, @bigint) AS C ON C.id = t.ID
--- Limit information back to most current version of change in table
+    -- Limit information back to most current version of change in table
     WHERE SYS_CHANGE_VERSION >=
     (
         SELECT TOP 1 table_version
@@ -96,7 +96,7 @@ View Version Tracking table
 */
 
 SELECT *
-FROM   VersionTracking;
+FROM dbo.VersionTracking;
 
 /*
 (2) Scenario A: Test 1 - TestRecords1 Table
@@ -104,7 +104,7 @@ View TestRecords1 table
 */
 
 SELECT *
-FROM   TestRecords1;
+FROM dbo.TestRecords1;
 
 /* 
 (3) Scenario A: Test 1 - TestRecords1Dest Table
@@ -112,4 +112,4 @@ View TestRecords1Dest table
 */
 
 SELECT *
-FROM   TestRecords1Dest;
+FROM dbo.TestRecords1Dest;

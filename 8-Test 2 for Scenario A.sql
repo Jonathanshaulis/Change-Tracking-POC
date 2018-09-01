@@ -1,3 +1,5 @@
+USE CTPOC;
+
 -- Move onto second piece of test. Update one row in three different transactions.
 UPDATE dbo.TestRecords1
   SET 
@@ -14,14 +16,14 @@ UPDATE dbo.TestRecords1
       FakeDate = '1900-01-01'
 WHERE id = 1;
 
--- View CT versions from wash table, system tracking, and then records in the table we updated.
+-- View CT versions from table, system tracking, and then records in the table we updated.
 SELECT *
-FROM VersionTracking;
+FROM dbo.VersionTracking;
 
-SELECT CHANGE_TRACKING_CURRENT_VERSION();
+SELECT CHANGE_TRACKING_CURRENT_VERSION() as 'Tracking Current Version';
 
 SELECT *
-FROM TestRecords1;
+FROM dbo.TestRecords1;
 
 -- Run CT process, expect one row to migrate over.
 DECLARE @bigint BIGINT;
@@ -34,7 +36,7 @@ SET @newbigint =
 SET @bigint =
 (
     SELECT TOP 1 table_version
-    FROM VersionTracking
+    FROM dbo.VersionTracking
     WHERE Table_Name = 'TestRecords1'
 );
 
@@ -45,12 +47,12 @@ USING
            t.FakeVarchar, 
            t.FakeInt, 
            t.FakeDate
-    FROM TestRecords1 t
+    FROM dbo.TestRecords1 t
          LEFT JOIN CHANGETABLE(CHANGES TestRecords1, @bigint) AS C ON C.id = t.ID
     WHERE SYS_CHANGE_VERSION >=
     (
         SELECT TOP 1 table_version
-        FROM VersionTracking
+        FROM dbo.VersionTracking
         WHERE Table_Name = 'TestRecords1'
     )
 ) AS Source
@@ -74,7 +76,7 @@ ON(Target.id = Source.id)
  Source.FakeDate
 );
 
-UPDATE VersionTracking
+UPDATE dbo.VersionTracking
   SET 
       Table_LastVersion = (@bigint), 
       table_version = (@newbigint)
@@ -83,10 +85,10 @@ WHERE Table_Name = 'TestRecords1';
 -- View result set aftewards.
 -- Resolves test (2)
 SELECT *
-FROM VersionTracking;
+FROM dbo.VersionTracking;
 
 SELECT *
-FROM TestRecords1;
+FROM dbo.TestRecords1;
 
 SELECT *
-FROM TestRecords1Dest;
+FROM dbo.TestRecords1Dest;
