@@ -1,13 +1,18 @@
--- Clear testing instance	
 USE CTPOC;
+
+-- Clear testing instance	
+
 TRUNCATE TABLE dbo.TestRecords1;
+
 TRUNCATE TABLE dbo.TestRecords1Dest;
+
 UPDATE dbo.VersionTracking
   SET 
       table_version = 0
 WHERE Table_Name = 'TestRecords1';
 
 -- Set new values for testing
+
 INSERT INTO dbo.TestRecords1
 (FakeVarchar, 
  FakeInt, 
@@ -27,23 +32,49 @@ VALUES
  '2018-03-01'
 );
 
--- Run CT process, expect three rows to migrate over.
--- Declaring variables to hold CT information
+INSERT INTO dbo.TestRecords1Dest
+(ID, 
+ FakeVarchar, 
+ FakeInt, 
+ FakeDate
+)
+       SELECT ID, 
+              FakeVarchar, 
+              FakeInt, 
+              FakeDate
+       FROM dbo.TestRecords1;
+
+UPDATE dbo.TestRecords1
+  SET 
+      fakevarchar = 'Z'
+WHERE id = 1;
+
+UPDATE dbo.TestRecords1
+  SET 
+      fakeint = '9001'
+WHERE id = 2;
+
+DELETE dbo.TestRecords1
+WHERE id = 3;
+
 DECLARE @bigint BIGINT;
+
 DECLARE @newbigint BIGINT;
--- Setting CT variable to database current version
+
 SET @newbigint =
 (
     SELECT CHANGE_TRACKING_CURRENT_VERSION()
 );
--- Setting another CT variable but to the table version.
+
 SET @bigint =
 (
     SELECT TOP 1 table_version
     FROM dbo.VersionTracking
     WHERE Table_Name = 'TestRecords1'
 );
--- Allows us to insert or update with the merge statement
+
+-- Records that need to be inserted or updated.
+
 MERGE dbo.TestRecords1Dest AS Target
 USING
 (
@@ -52,9 +83,7 @@ USING
            t.FakeInt, 
            t.FakeDate
     FROM dbo.TestRecords1 t
-         -- Join to system table allows us to filter results
          LEFT JOIN CHANGETABLE(CHANGES dbo.TestRecords1, @bigint) AS C ON C.id = t.ID
-    -- Limit information back to most current version of change in table
     WHERE SYS_CHANGE_VERSION >=
     (
         SELECT TOP 1 table_version
@@ -82,66 +111,86 @@ ON(Target.id = Source.id)
  Source.FakeDate
 );
 
--- Set VersionTracking to last update of table.
+-- Records that should be deleted
+
+DELETE dbo.TestRecords1Dest
+WHERE ID IN
+(
+    SELECT C.id
+    FROM CHANGETABLE(CHANGES dbo.TestRecords1, @bigint) AS C
+    WHERE SYS_CHANGE_OPERATION = 'D'
+          AND C.id NOT IN
+    (
+        SELECT t.id
+        FROM dbo.TestRecords1 t
+             LEFT JOIN CHANGETABLE(CHANGES dbo.TestRecords1, @bigint) AS C ON C.id = t.ID
+        WHERE SYS_CHANGE_VERSION >=
+        (
+            SELECT TOP 1 table_version
+            FROM dbo.VersionTracking
+            WHERE Table_Name = 'TestRecords1'
+        )
+    )
+);
+
+-- Set version to latest pull
+
 UPDATE dbo.VersionTracking
   SET 
       Table_LastVersion = (@bigint), 
       table_version = (@newbigint)
 WHERE Table_Name = 'TestRecords1';
 
-/*
-(1) Scenario A: Test 1 - Version Tracking Table
-View result set afterwards
-View Version Tracking table
-*/
+-- View result set aftewards.
+-- TestRecords1Dest should contain two rows
+
+SELECT CHANGE_TRACKING_CURRENT_VERSION();
 
 SELECT *
 FROM dbo.VersionTracking;
 
-/*
-(2) Scenario A: Test 1 - TestRecords1 Table
-View TestRecords1 table
-*/
-
 SELECT *
 FROM dbo.TestRecords1;
-
-/* 
-(3) Scenario A: Test 1 - TestRecords1Dest Table
-View TestRecords1Dest table
-*/
 
 SELECT *
 FROM dbo.TestRecords1Dest;
 
--- Change two records, setting us up for the third objective for Test 1.
-UPDATE dbo.TestRecords1
-SET FakeDate = '2020-04-14'
-WHERE ID = '2';
-GO
+-- Set record for testing
+
+SET IDENTITY_INSERT dbo.TestRecords1 ON;
+
+INSERT INTO TestRecords1
+(ID, 
+ FakeVarchar, 
+ FakeInt, 
+ FakeDate
+)
+VALUES
+(3, 
+ 'C', 
+ 3, 
+ '2018-03-01'
+);
+
+SET IDENTITY_INSERT dbo.TestRecords1 OFF;
 
 UPDATE dbo.TestRecords1
-SET FakeDate = '2020-08-18'
-WHERE ID = '3';
-GO
-
--- Set VersionTracking to 0 to indicate a full pull
-UPDATE dbo.VersionTracking
   SET 
-      table_version = 0
-WHERE Table_Name = 'TestRecords1';
+      FakeDate = '2020-04-24'
+WHERE id = 3;
 GO
 
--- Run CT process, expect three rows to migrate over.
--- Declaring variables to hold CT information
+-- Run test
+
 DECLARE @bigint BIGINT;
+
 DECLARE @newbigint BIGINT;
--- Setting CT variable to database current version
+
 SET @newbigint =
 (
     SELECT CHANGE_TRACKING_CURRENT_VERSION()
 );
--- Setting another CT variable but to the table version.
+
 SET @bigint =
 (
     SELECT TOP 1 table_version
@@ -149,7 +198,8 @@ SET @bigint =
     WHERE Table_Name = 'TestRecords1'
 );
 
--- Allows us to insert or update with the merge statement
+-- Records that need to be inserted or updated.
+
 MERGE dbo.TestRecords1Dest AS Target
 USING
 (
@@ -158,9 +208,7 @@ USING
            t.FakeInt, 
            t.FakeDate
     FROM dbo.TestRecords1 t
-         -- Join to system table allows us to filter results
          LEFT JOIN CHANGETABLE(CHANGES dbo.TestRecords1, @bigint) AS C ON C.id = t.ID
-    -- Limit information back to most current version of change in table
     WHERE SYS_CHANGE_VERSION >=
     (
         SELECT TOP 1 table_version
@@ -187,36 +235,48 @@ ON(Target.id = Source.id)
  Source.FakeInt, 
  Source.FakeDate
 );
--- Set VersionTracking to last update of table.
+
+-- Records that should be deleted
+
+DELETE dbo.TestRecords1Dest
+WHERE ID IN
+(
+    SELECT C.id
+    FROM CHANGETABLE(CHANGES dbo.TestRecords1, @bigint) AS C
+    WHERE SYS_CHANGE_OPERATION = 'D'
+          AND C.id NOT IN
+    (
+        SELECT t.id
+        FROM dbo.TestRecords1 t
+             LEFT JOIN CHANGETABLE(CHANGES dbo.TestRecords1, @bigint) AS C ON C.id = t.ID
+        WHERE SYS_CHANGE_VERSION >=
+        (
+            SELECT TOP 1 table_version
+            FROM dbo.VersionTracking
+            WHERE Table_Name = 'TestRecords1'
+        )
+    )
+);
+
+-- Set version to latest pull
+
 UPDATE dbo.VersionTracking
   SET 
       Table_LastVersion = (@bigint), 
       table_version = (@newbigint)
 WHERE Table_Name = 'TestRecords1';
 
-/*
-(4) Scenario A: Test 1 - Version Tracking Table
-View result set afterwards
-Resolves Test 1
-View Version Tracking table
-*/
+-- View result set aftewards.
+-- TestRecords1Dest should contain three rows
+-- Resolves test (2)
+
+SELECT CHANGE_TRACKING_CURRENT_VERSION();
 
 SELECT *
 FROM dbo.VersionTracking;
 
-/*
-(5) Scenario A: Test 1 - TestRecords1 Table
-View TestRecords1 table
-*/
-
 SELECT *
 FROM dbo.TestRecords1;
 
-/* 
-(6) Scenario A: Test 1 - TestRecords1Dest Table
-View TestRecords1Dest table
-*/
-
 SELECT *
 FROM dbo.TestRecords1Dest;
-

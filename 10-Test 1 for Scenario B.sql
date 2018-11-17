@@ -1,5 +1,3 @@
-
-
 USE CTPOC;
 
 -- Clear testing instance	
@@ -146,13 +144,34 @@ WHERE Table_Name = 'TestRecords1';
 -- View result set aftewards.
 -- Resolves test (1)
 
+/*
+(1) Scenario B: Test 1 - Change Tracking Current Version
+View current tracking version
+*/
+
 SELECT CHANGE_TRACKING_CURRENT_VERSION();
+
+/*
+(2) Scenario B: Test 1 - Version Tracking Table
+View result set afterwards
+View Version Tracking table
+*/
 
 SELECT *
 FROM dbo.VersionTracking;
 
+/*
+(3) Scenario B: Test 1 - TestRecords1 Table
+View TestRecords1 table 
+*/
+
 SELECT *
 FROM dbo.TestRecords1;
+
+/* 
+(4) Scenario B: Test 1 - TestRecords1Dest Table
+View TestRecords1Dest table
+*/
 
 SELECT *
 FROM dbo.TestRecords1Dest;
