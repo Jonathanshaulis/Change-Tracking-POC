@@ -173,7 +173,7 @@ USING
            t.FakeInt, 
            t.FakeDate
     FROM dbo.TestRecords1 t
-         LEFT JOIN CHANGETABLE(CHANGES TestRecords1, 12) AS C ON C.id = t.ID
+         LEFT JOIN CHANGETABLE(CHANGES TestRecords1, @bigint) AS C ON C.id = t.ID
     WHERE SYS_CHANGE_VERSION >=
     (
         SELECT TOP 1 table_version

@@ -149,7 +149,7 @@ WHERE Table_Name = 'TestRecords1';
 View current tracking version
 */
 
-SELECT CHANGE_TRACKING_CURRENT_VERSION();
+SELECT CHANGE_TRACKING_CURRENT_VERSION() as 'Change Tracking Current Version';
 
 /*
 (2) Scenario B: Test 1 - Version Tracking Table

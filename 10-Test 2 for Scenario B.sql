@@ -144,13 +144,34 @@ WHERE Table_Name = 'TestRecords1';
 -- View result set aftewards.
 -- TestRecords1Dest should contain two rows
 
-SELECT CHANGE_TRACKING_CURRENT_VERSION();
+/*
+(1) Scenario B: Test 2 - Change Tracking Current Version
+View current tracking version
+*/
+
+SELECT CHANGE_TRACKING_CURRENT_VERSION() as 'Change Tracking Current Version';
+
+/*
+(2) Scenario B: Test 2 - Version Tracking Table
+View result set afterwards
+View Version Tracking table
+*/
 
 SELECT *
 FROM dbo.VersionTracking;
 
+/*
+(3) Scenario B: Test 2 - TestRecords1 Table
+View TestRecords1 table 
+*/
+
 SELECT *
 FROM dbo.TestRecords1;
+
+/* 
+(4) Scenario B: Test 2 - TestRecords1Dest Table
+View TestRecords1Dest table
+*/
 
 SELECT *
 FROM dbo.TestRecords1Dest;
@@ -268,15 +289,34 @@ WHERE Table_Name = 'TestRecords1';
 
 -- View result set aftewards.
 -- TestRecords1Dest should contain three rows
--- Resolves test (2)
 
-SELECT CHANGE_TRACKING_CURRENT_VERSION();
+/*
+(5) Scenario B: Test 2 - Change Tracking Current Version
+View current tracking version
+*/ 
+
+SELECT CHANGE_TRACKING_CURRENT_VERSION() as 'Change Tracking Current Version';
+
+/*
+(6) Scenario B: Test 2 - Version Tracking Table
+View result set afterwards
+View Version Tracking table
+*/
 
 SELECT *
 FROM dbo.VersionTracking;
 
+/*
+(7) Scenario B: Test 2 - TestRecords1 Table
+View TestRecords1 table 
+*/
+
 SELECT *
 FROM dbo.TestRecords1;
 
+/* 
+(8) Scenario B: Test 2 - TestRecords1Dest Table
+View TestRecords1Dest table
+*/
 SELECT *
 FROM dbo.TestRecords1Dest;
